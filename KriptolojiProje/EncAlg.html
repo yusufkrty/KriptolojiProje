@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Şifreleme Uygulaması</title>
+    <script>
+        // Adım 1: Metni ters çevirme
+        function reverseText(text) {
+            return text.split('').reverse().join('');
+        }
+
+        // Adım 2: Karakterleri kaydırma
+        function shiftCharacters(text, shiftAmount) {
+            return text.split('').map(char => {
+                const charCode = char.charCodeAt(0);
+                const shiftedCharCode = charCode + shiftAmount;
+                return String.fromCharCode(shiftedCharCode);
+            }).join('');
+        }
+
+        // Adım 3: Anahtar Eklemek
+        function addKey(text, key) {
+            let result = '';
+            for (let i = 0; i < text.length; i++) {
+                const charCode = text.charCodeAt(i) ^ key.charCodeAt(i % key.length);
+                result += String.fromCharCode(charCode);
+            }
+            return result;
+        }
+
+        // Adım 4: Base64 Şifreleme
+        function base64Encode(text) {
+            return btoa(text);
+        }
+
+        // Şifreleme Fonksiyonu
+        function encrypt(text, key, shiftAmount) {
+            // Adım 1: Metni ters çevirme
+            let reversedText = reverseText(text);
+
+            // Adım 2: Karakterleri kaydırma
+            let shiftedText = shiftCharacters(reversedText, shiftAmount);
+
+            // Adım 3: Anahtar eklemek
+            let textWithKey = addKey(shiftedText, key);
+
+            // Adım 4: Base64 şifreleme
+            let encryptedText = base64Encode(textWithKey);
+
+            return encryptedText;
+        }
+
+        // Deşifreleme Fonksiyonu
+        function decrypt(text, key, shiftAmount) {
+            // Base64 çözme
+            let decodedText = atob(text);
+
+            // Anahtar eklemeyi geri alma
+            let textWithoutKey = addKey(decodedText, key);
+
+            // Karakter kaydırma işlemi
+            let shiftedText = shiftCharacters(textWithoutKey, -shiftAmount);
+
+            // Metni ters çevirme
+            let originalText = reverseText(shiftedText);
+
+            return originalText;
+        }
+
+        // Web uygulama işlemleri
+        function performAction() {
+            let inputText = document.getElementById('inputText').value;
+            let key = document.getElementById('key').value;
+            let shiftAmount = parseInt(document.getElementById('shiftAmount').value);
+            let action = document.getElementById('action').value;
+
+            let result;
+
+            if (action === 'encrypt') {
+                result = encrypt(inputText, key, shiftAmount);
+            } else if (action === 'decrypt') {
+                result = decrypt(inputText, key, shiftAmount);
+            }
+
+            document.getElementById('outputText').value = result;
+        }
+    </script>
+</head>
+<body>
+    <h1>Şifreleme Uygulaması</h1>
+
+    <label for="inputText">Metin:</label>
+    <input type="text" id="inputText">
+
+    <label for="key">Anahtar:</label>
+    <input type="text" id="key">
+
+    <label for="shiftAmount">Kaydırma Miktarı:</label>
+    <input type="number" id="shiftAmount" value="3">
+
+    <label for="action">İşlem:</label>
+    <select id="action">
+        <option value="encrypt">Şifrele</option>
+        <option value="decrypt">Deşifrele</option>
+    </select>
+
+    <button onclick="performAction()">İşlemi Gerçekleştir</button>
+
+    <label for="outputText">Sonuç:</label>
+    <textarea id="outputText" rows="4" cols="50" readonly></textarea>
+</body>
+</html>
